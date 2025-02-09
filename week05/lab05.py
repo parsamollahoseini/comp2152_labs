@@ -17,7 +17,7 @@ def inception_dream():
 # GAME FLOW
 # ---------------------
 
-# Define two Dice
+# Define dice options
 small_dice_options = list(range(1, 7))
 big_dice_options = list(range(1, 21))
 
@@ -40,23 +40,27 @@ monster_powers = {
 # Define the number of stars to award the player
 num_stars = 0
 
-# Get valid input for Hero and Monster's Combat Strength
+# Loop to get valid input for Hero and Monster's Combat Strength
 i = 0
 input_invalid = True
 
-while input_invalid and i in range(5):
+while input_invalid and i < 5:
     print("    ------------------------------------------------------------------")
     print("    |", end="    ")
-    combat_strength = input("Enter your combat Strength (1-6): ")
+    combat_strength_input = input("Enter your combat Strength (1-6): ")
     print("    |", end="    ")
-    m_combat_strength = input("Enter the monster's combat Strength (1-6): ")
+    m_combat_strength_input = input("Enter the monster's combat Strength (1-6): ")
 
-    # Validate that both inputs are numeric
-    if (not combat_strength.isnumeric()) or (not m_combat_strength.isnumeric()):
+    # Validate input: both must be numeric
+    if (not combat_strength_input.isdigit()) or (not m_combat_strength_input.isdigit()):
         print("    |    One or more invalid inputs. Player needs to enter integer numbers for Combat Strength    |")
         i += 1
         continue
-    elif (int(combat_strength) not in range(1, 7)) or (int(m_combat_strength) not in range(1, 7)):
+
+    combat_strength_val = int(combat_strength_input)
+    m_combat_strength_val = int(m_combat_strength_input)
+
+    if (combat_strength_val not in range(1, 7)) or (m_combat_strength_val not in range(1, 7)):
         print("    |    Enter a valid integer between 1 and 6 only")
         i += 1
         continue
@@ -65,13 +69,13 @@ while input_invalid and i in range(5):
         break
 
 if not input_invalid:
-    combat_strength = int(combat_strength)
-    m_combat_strength = int(m_combat_strength)
+    combat_strength = combat_strength_val
+    m_combat_strength = m_combat_strength_val
 
     # Roll for weapon
     print("    |", end="    ")
     input("Roll the dice for your weapon (Press enter)")
-    ascii_image5 = """
+    ascii_image_weapon = """
               , %               .           
    *      @./  #         @  &.(         
   @        /@   (      ,    @       # @ 
@@ -83,15 +87,15 @@ if not input_invalid:
              /     # @   *              
                  ,     %                
             @&@           @&@
-            """
-    print(ascii_image5)
+    """
+    print(ascii_image_weapon)
     weapon_roll = random.choice(small_dice_options)
 
-    # Increase the combat strength by the weapon roll (max capped at 6)
-    combat_strength = min(6, (combat_strength + weapon_roll))
+    # Increase the combat strength by the weapon roll (capped at 6)
+    combat_strength = min(6, combat_strength + weapon_roll)
     print("    |    The hero's weapon is " + str(weapons[weapon_roll - 1]))
 
-    # Analyze weapon roll
+    # Weapon Roll Analysis
     print("    ------------------------------------------------------------------")
     print("    |", end="    ")
     input("Analyze the Weapon roll (Press enter)")
@@ -102,6 +106,7 @@ if not input_invalid:
         print("--- Your weapon is meh")
     else:
         print("--- Nice weapon, friend!")
+
     if weapons[weapon_roll - 1] != "Fist":
         print("    |    --- Thank goodness you didn't roll the Fist...")
 
@@ -117,23 +122,21 @@ if not input_invalid:
     m_health_points = random.choice(big_dice_options)
     print("    |    Monster rolled " + str(m_health_points) + " health points")
 
-    # ---------------------
-    # COLLECT LOOT (using the new function)
-    # ---------------------
+    # Collect Loot using the new function
     belt, loot_options = functions_lab05.collect_loot(belt, loot_options)
 
-    # ---------------------
-    # USE LOOT (using the new function)
-    # ---------------------
+    # Use Loot using the new function
     belt, health_points = functions_lab05.use_loot(belt, health_points, good_loot_options, bad_loot_options)
 
-    # ---------------------
-    # DETERMINE WHO STRIKES FIRST
-    # ---------------------
+    # Roll for Monster's Magic Power using the new function
+    m_combat_strength = functions_lab05.roll_monster_power(m_combat_strength, monster_powers)
+
+    # Determine who strikes first
     attack_roll = random.choice(small_dice_options)
     print("Attack roll is: " + str(attack_roll))
     print("You meet the monster. FIGHT!!")
 
+    # Fight Sequence
     while m_health_points > 0 and health_points > 0:
         if attack_roll in [1, 3, 5]:
             input("You strike first (Press Enter)")
@@ -162,9 +165,7 @@ if not input_invalid:
             else:
                 num_stars = 2
 
-    # ---------------------
-    # AFTER THE BATTLE: GET THE HERO'S NAME
-    # ---------------------
+    # After the battle: Get the Hero's name
     while True:
         hero_name = input("Enter your Hero's name (in two words): ").strip()
         name_parts = hero_name.split()
@@ -179,17 +180,13 @@ if not input_invalid:
     # Create a short name: first 2 letters of first word + first letter of second word
     short_name = name_parts[0][:2] + name_parts[1][0]
 
-    # ---------------------
-    # RECURSIVE DREAM EVENT
-    # ---------------------
+    # Recursive Dream Event
     crazy_level = inception_dream()
     # After the dream, reduce health by 1 and boost combat strength by crazy_level
     health_points = max(0, health_points - 1)
-    combat_strength = combat_strength + crazy_level
+    combat_strength += crazy_level
     print(f"After a deep dream, your health is now {health_points} and your combat strength increased to {combat_strength}.")
 
-    # ---------------------
-    # FINAL STAR AWARD PRINT STATEMENT (using short_name)
-    # ---------------------
+    # Final Star Award Print Statement using short_name
     stars = "*" * num_stars
     print("Hero " + short_name + " gets " + stars + " stars")
